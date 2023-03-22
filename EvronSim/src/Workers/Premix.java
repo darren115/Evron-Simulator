@@ -12,6 +12,22 @@ import ingredients.DryIngredient;
 import ingredients.IngredientBin;
 import recipes.Recipe;
 
+
+//******************************************************************//
+//Dry Ingredient Premixer                                           //
+//Responsible for following the recipe and adding the correct       //
+//ingredients to the mix.
+//
+//Recipe informs ingredient and amount
+//Bins contain ingredients and have a limited volume
+//When ingredients have been weighed they are added to containers
+//When containers are full and there is an empty bowl the containers
+//are tipped into the bowl.
+//Paperwork is done and if a bowl is not available the worker waits
+//******************************************************************//
+
+
+
 public class Premix implements Runnable {
 
 	private int speed;
@@ -27,18 +43,12 @@ public class Premix implements Runnable {
 	private int numMixes = 10;
 	
 	private int scoopSize = 1000;
-	private int scoopTime = 300; //should be 3 seconds
+	private int scoopTime = 300; //should be 3 seconds with random element
 
 	public Premix(Recipe recipe, Map<DryIngredient, IngredientBin> bins, List<Bowl> bowls) {
 		this.recipe = recipe;
 		this.bins = bins;
-		this.bowls = bowls;
-//		bins = new HashMap<>();
-
-//		for(Entry<DryIngredient, Integer> ingredient : recipe.getDryIngredients().entrySet()) {
-//			bins.put(ingredient.getKey(), new IngredientBin(ingredient.getKey(), 50000) );
-//		}
-//		
+		this.bowls = bowls;	
 
 	}
 

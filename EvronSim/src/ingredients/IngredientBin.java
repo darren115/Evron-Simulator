@@ -37,11 +37,11 @@ public class IngredientBin {
 		return type;
 	}
 	
-	public boolean beingUsed() {
+	public synchronized boolean beingUsed() {
 		return used;
 	}
 	
-	public void useBin() {
+	public synchronized void useBin() {
 		used = true;
 	}
 	

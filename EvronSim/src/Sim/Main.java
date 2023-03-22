@@ -12,6 +12,7 @@ import Workers.Premix;
 import Workers.Tipper;
 import Workers.WetMix;
 import equipment.Bowl;
+import equipment.PoweredMixer;
 import ingredients.DryIngredient;
 import ingredients.IngredientBin;
 import recipes.Bread;
@@ -21,6 +22,12 @@ public class Main {
 	public static final int NUM_MIXES = 10;
 
 	public static void main(String args[]) {
+		
+		PoweredMixer mixer1 = new PoweredMixer(1);
+		PoweredMixer mixer2 = new PoweredMixer(2);
+		List<PoweredMixer> mixers = new ArrayList<>();
+		mixers.add(mixer1);
+		mixers.add(mixer2);
 		
 		Bowl bowl1 = new Bowl(1);
 		Bowl bowl2 = new Bowl(2);
@@ -37,8 +44,8 @@ public class Main {
 			bins.put(ingredient.getKey(), new IngredientBin(ingredient.getKey(), 50000) );
 		}
 		Premix mix1 = new Premix(bread, bins, bowls);
-		WetMix mix2 = new WetMix(bread, bowls);
-		Tipper mix = new Tipper(bins, bowls);
+		WetMix mix2 = new WetMix(bread, bowls, mixers);
+		Tipper mix = new Tipper(bins, bowls, mixers);
 		
 		Thread thread= new Thread(mix1);
 		thread.start();

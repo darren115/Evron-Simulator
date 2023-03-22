@@ -19,6 +19,7 @@ public class Bowl {
 	public synchronized void setEmpty(boolean isEmpty) {
 		this.isEmpty = isEmpty;
 		setHasWater(false);
+		setHasWetMix(false);
 	}
 
 	public boolean isHasWater() {
