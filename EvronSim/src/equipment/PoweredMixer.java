@@ -16,10 +16,11 @@ public class PoweredMixer implements Runnable {
 		this.id = id;
 	}
 	
-	public void start(Bowl bowl, int time) {
+	public synchronized void start(Bowl bowl, int time) {
 		this.bowl = bowl;
 		this.setTime = time;
 		finishedMixing = false;
+		isMixing = true;
 		mixer = new Thread(this);
 		mixer.start();
 	}
@@ -28,9 +29,10 @@ public class PoweredMixer implements Runnable {
 	@Override
 	public void run() {
 
-		isMixing = true;
+		
+		
 
-		System.out.println("Start mixing");
+		System.out.println("Start mixing " + id + " bowl " + bowl.getId());
 
 		try {
 			Thread.sleep(setTime);
@@ -40,7 +42,8 @@ public class PoweredMixer implements Runnable {
 
 		isMixing = false;
 		finishedMixing = true;
-		System.out.println("Finished mixing");
+		bowl.setFinishedMixing();
+		System.out.println("Finished mixing " + id);
 
 	}
 

@@ -55,20 +55,27 @@ public class WetMix implements Runnable {
 	public void run() {
 		while (running) {
 
-			// broke weigh water
 			if (!wetMixReady) {
-
 				weighMix();
 			} else {
 				tipMix();
 			}
+			
+			
+			//breaking here, gets stuck rechecking the 1st bowl
 
 			for (Bowl bowl : bowls) {
-				if (bowl.isEmpty() == false && bowl.isHasWater() == false) {
-					// fork / join a separate thread?
+//				try {
+//					Thread.sleep(1000);
+//					System.out.println(" Bowl " + bowl.getId() + " " + bowl.isHasWater() + " " + bowl.isHasWetMix() + 
+//					" " + bowl.isHasDryMix());
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+				if (bowl.isHasDryMix() && bowl.isHasWetMix() && bowl.isHasWater() == false) {
 					runWater(bowl);
 					break;
-				} else if (bowl.isEmpty() == false && bowl.isHasWater() == true) {
+				} else if (bowl.isHasDryMix() && bowl.isHasWater() && bowl.isHasWetMix() && !bowl.isMixing()) {
 					startMixer(bowl);
 					break;
 				}
@@ -84,14 +91,14 @@ public class WetMix implements Runnable {
 				// skip?
 			} else {
 				try {
-					// System.out.println("Weighing up wet ingredient " + ingredient.getKey());
+					System.out.println("Weighing up wet ingredient " + ingredient.getKey());
 					Thread.sleep(ingredient.getValue() / 3);
 
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 
-				// System.out.println("Finished weighing up " + ingredient.getKey());
+				System.out.println("Finished weighing up " + ingredient.getKey());
 				wetMixReady = true;
 			}
 		}
@@ -101,10 +108,10 @@ public class WetMix implements Runnable {
 	private void tipMix() {
 		if (wetMixReady) {
 			for (Bowl bowl : bowls) {
-				if (!bowl.isEmpty() && !bowl.isHasWetMix()) {
+				if (!bowl.isHasWetMix() && bowl.isHasDryMix()) {
 
 					System.out.println("Tipped wet mix");
-					bowl.setHasWetMix(true);
+					bowl.setHasWetMix();
 					wetMixReady = false;
 					break;
 				}
@@ -114,14 +121,25 @@ public class WetMix implements Runnable {
 
 	private void runWater(Bowl bowl) {
 		System.out.println("Started Water");
-		bowl.setHasWater(true);
+		bowl.setHasWater();
 	}
+	
+	//issue with bowl being started with 2 mixers
+	//adding bowl to both mixers
 
 	private void startMixer(Bowl bowl) {
 		for(PoweredMixer mixer: mixers) {
-			if(!mixer.isMixing()) {
-				mixer.start(bowl, 1000);
-				System.out.println("Started Mixer");
+//			try {
+//				Thread.sleep(1000);
+////				System.out.println("Mixer " + mixer.getId() + " " + mixer.isMixing()
+////				+ " Bowl " + bowl.getId() + " " + bowl.isHasWater() + " " + bowl.isHasWetMix() + 
+////				" " + bowl.isEmpty());
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+			if(!mixer.isMixing() && !bowl.isFinishedMixing() && !bowl.isMixing()) {
+				bowl.setMixing();
+				mixer.start(bowl, 20000);
 				break;
 			}
 		}

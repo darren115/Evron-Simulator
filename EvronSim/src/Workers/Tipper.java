@@ -44,8 +44,8 @@ public class Tipper implements Runnable {
 			checkBins();
 			
 			for (Bowl bowl : bowls) {
-				//if(bowl.isHasWater() && bowl.isHasWetMix() && !bowl.isEmpty())
-					//tipMix(bowl);
+				if(bowl.isFinishedMixing())
+					tipMix(bowl);
 				
 			}
 			
@@ -84,7 +84,7 @@ public class Tipper implements Runnable {
 
 	private void tipMix(Bowl bowl) {
 		System.out.println("Tipped Mix into Vemag");
-		bowl.setEmpty(true);
+		bowl.setEmpty();
 	}
 
 }

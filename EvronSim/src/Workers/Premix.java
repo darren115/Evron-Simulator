@@ -36,7 +36,7 @@ public class Premix implements Runnable {
 	private boolean containersEmpty = true;
 	private int containersVolume = 0;
 	List<Bowl> bowls = new ArrayList<>();
-	private int mixNumber = 0;
+	private int mixNumber = 200;
 
 	private ConcurrentMap<DryIngredient, Integer> addedIngredients = new ConcurrentHashMap<>();
 
@@ -90,13 +90,14 @@ public class Premix implements Runnable {
 		}
 		
 		mixNumber++;
-		System.out.println("Dry mix finish " +mixNumber);
+		System.out.println("Dry mix finish " + mixNumber);
 
 		// while containers arent empty keep trying to tip them;
 		// producer consumer on the bowls?
 		while (!containersEmpty) {
 			for (Bowl bowl : bowls) {
-				if (bowl.isEmpty()) {
+				if (!bowl.isHasDryMix()) {
+//					System.out.println(bowl.isHasDryMix());
 					tipContainers(bowl);
 					break;
 				}
@@ -106,9 +107,9 @@ public class Premix implements Runnable {
 	}
 
 	private void tipContainers(Bowl bowl) {
-		bowl.setEmpty(false);
+		System.out.println("containers tipped into bowl " + bowl.getId());
+		bowl.setHasDryMix();
 		containersEmpty = true;
-		System.out.println("containers tipped");
 	}
 
 	@Override
