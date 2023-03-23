@@ -6,6 +6,7 @@ import java.util.Map;
 
 import equipment.Bowl;
 import equipment.PoweredMixer;
+import equipment.Vemag;
 import ingredients.DryIngredient;
 import ingredients.IngredientBin;
 
@@ -26,11 +27,14 @@ public class Tipper implements Runnable {
 	private Map<DryIngredient, IngredientBin> bins;
 	List<Bowl> bowls = new ArrayList<>();
 	private boolean finished = false;
+	private Vemag vemag;
 
-	public Tipper(Map<DryIngredient, IngredientBin> bins, List<Bowl> bowls, List<PoweredMixer> mixers) {
+	public Tipper(Map<DryIngredient, IngredientBin> bins, 
+			List<Bowl> bowls, List<PoweredMixer> mixers, Vemag vemag) {
 		this.bins = bins;
 		this.bowls = bowls;
 		this.mixers = mixers;
+		this.vemag = vemag;
 		// fill bins as long as they arent being used
 		// when mix is ready tip mix
 
@@ -84,6 +88,7 @@ public class Tipper implements Runnable {
 
 	private void tipMix(Bowl bowl) {
 		System.out.println("Tipped Mix into Vemag");
+		vemag.tipMix(10000); //bowl should be aware of volume?
 		bowl.setEmpty();
 	}
 

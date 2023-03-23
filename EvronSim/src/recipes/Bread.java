@@ -15,6 +15,7 @@ public class Bread extends Recipe{
 		addDryIngredient(E471, 700);
 		addDryIngredient(PSYLLIUM_HUSK, 1400);
 		addDryIngredient(SALT, 600);
+		addDryIngredient(WHITE_PREMIX, 4000);
 
 		
 		

@@ -5,14 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import Workers.Premix;
 import Workers.Tipper;
 import Workers.WetMix;
 import equipment.Bowl;
 import equipment.PoweredMixer;
+import equipment.Vemag;
 import ingredients.DryIngredient;
 import ingredients.IngredientBin;
 import recipes.Bread;
@@ -22,6 +21,10 @@ public class Main {
 	public static final int NUM_MIXES = 10;
 
 	public static void main(String args[]) {
+		
+		Vemag vemag = new Vemag(60, 500);
+		Thread vmg = new Thread(vemag);
+		vmg.start();
 		
 		PoweredMixer mixer1 = new PoweredMixer(1);
 		PoweredMixer mixer2 = new PoweredMixer(2);
@@ -45,7 +48,7 @@ public class Main {
 		}
 		Premix mix1 = new Premix(bread, bins, bowls);
 		WetMix mix2 = new WetMix(bread, bowls, mixers);
-		Tipper mix = new Tipper(bins, bowls, mixers);
+		Tipper mix = new Tipper(bins, bowls, mixers, vemag);
 		
 		Thread thread= new Thread(mix1);
 		thread.start();

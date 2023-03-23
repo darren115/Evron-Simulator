@@ -4,9 +4,9 @@ public class Vemag implements Runnable{
 	
 	//private int clip;
 	private int speed;
-	private int currentVolume;
+	private int currentVolume=0;
 	private int unitSize;
-	private boolean switchedOn = false;
+	private boolean switchedOn = true;
 	
 	public Vemag(int speed, int unitSize) {
 		this.speed = speed;
@@ -17,15 +17,17 @@ public class Vemag implements Runnable{
 	@Override
 	public synchronized void run() {
 		while(switchedOn) {
-			if(currentVolume < unitSize) {
+			while(currentVolume < unitSize) {
 				try {
-					this.wait();
+					System.out.println("---------------WAITING VEMAG " + currentVolume);
+					wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 			
-			currentVolume -= unitSize;
+			System.out.println("Running VEMAG" + currentVolume);
+			currentVolume = currentVolume - unitSize;
 			
 			
 			try {
@@ -37,8 +39,10 @@ public class Vemag implements Runnable{
 		
 	}
 	
-	public void tipMix(int size) {
+	public synchronized void tipMix(int size) {
 		this.currentVolume += size;
+		System.out.println("------Vemag " + currentVolume);
+		notifyAll();
 	}
 
 	public int getSpeed() {
