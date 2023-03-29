@@ -56,6 +56,7 @@ public class PoweredMixer implements Runnable {
 	}
 
 	public boolean isFinishedMixing() {
+		System.out.println("called");
 		return finishedMixing;
 	}
 	

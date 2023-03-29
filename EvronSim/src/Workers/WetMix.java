@@ -2,15 +2,20 @@ package Workers;
 
 import static ingredients.WetIngredient.WATER;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import equipment.Bowl;
 import equipment.PoweredMixer;
 import ingredients.WetIngredient;
+import recipes.Drawable;
 import recipes.Recipe;
 
 //******************************************************************//
@@ -29,7 +34,7 @@ import recipes.Recipe;
 //Paperwork is done 
 //******************************************************************//
 
-public class WetMix implements Runnable {
+public class WetMix implements Runnable, Drawable {
 
 	private List<PoweredMixer> mixers = new ArrayList<>();
 
@@ -40,17 +45,25 @@ public class WetMix implements Runnable {
 
 	private boolean wetMixReady = false;
 	private Map<WetIngredient, Boolean> ingredientsWeighed = new HashMap<>();
+	
+	private int numMixes = 10;
+	
+	ConcurrentLinkedQueue <String> previousStatus;
+	private String status = "";
 
-	public WetMix(Recipe recipe, List<Bowl> bowls, List<PoweredMixer> mixers) {
+	public WetMix(Recipe recipe, List<Bowl> bowls, List<PoweredMixer> mixers, int numMixes) {
 		this.recipe = recipe;
 		this.bowls = bowls;
 		this.mixers = mixers;
+		this.numMixes = numMixes;
+		
+		previousStatus = new ConcurrentLinkedQueue<>();
 
 		for (WetIngredient ing : recipe.getWetIngredients().keySet()) {
 			ingredientsWeighed.put(ing, false);
 		}
 	}
-
+	
 	@Override
 	public void run() {
 		while (running) {
@@ -61,8 +74,6 @@ public class WetMix implements Runnable {
 				tipMix();
 			}
 			
-			
-			//breaking here, gets stuck rechecking the 1st bowl
 
 			for (Bowl bowl : bowls) {
 //				try {
@@ -92,13 +103,15 @@ public class WetMix implements Runnable {
 			} else {
 				try {
 					System.out.println("Weighing up wet ingredient " + ingredient.getKey());
-					Thread.sleep(ingredient.getValue() / 3);
+					updateStatus("Weighing up wet ingredient " + ingredient.getKey());
+					Thread.sleep(ingredient.getValue());
 
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 
 				System.out.println("Finished weighing up " + ingredient.getKey());
+				updateStatus("Finished weighing up " + ingredient.getKey());
 				wetMixReady = true;
 			}
 		}
@@ -111,6 +124,7 @@ public class WetMix implements Runnable {
 				if (!bowl.isHasWetMix() && bowl.isHasDryMix()) {
 
 					System.out.println("Tipped wet mix");
+					updateStatus("Tipped wet mix");
 					bowl.setHasWetMix();
 					wetMixReady = false;
 					break;
@@ -121,6 +135,7 @@ public class WetMix implements Runnable {
 
 	private void runWater(Bowl bowl) {
 		System.out.println("Started Water");
+		updateStatus("Started Water");
 		bowl.setHasWater();
 	}
 	
@@ -143,6 +158,30 @@ public class WetMix implements Runnable {
 				break;
 			}
 		}
+		
+	}
+	
+	private void updateStatus(String status) {
+		
+		if(previousStatus.size()> 5) previousStatus.poll();
+		previousStatus.offer(this.status);
+		this.status = status;
+	}
+
+	@Override
+	public void draw(Graphics g) {
+		g.setColor(Color.black);
+		g.setFont(new Font("arial", Font.BOLD, 16));
+		
+		int index = 0;
+		for(String oldStatus: previousStatus) {
+			g.drawString(oldStatus, 60, 510-((previousStatus.size() - index)*20));
+			index++;
+		}
+		
+		g.setColor(Color.black);
+		g.setFont(new Font("times new roman", Font.BOLD, 16));
+		g.drawString(status, 60, 520);
 		
 	}
 

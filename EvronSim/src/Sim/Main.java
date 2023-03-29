@@ -19,6 +19,7 @@ import recipes.Bread;
 public class Main {
 	
 	public static final int NUM_MIXES = 10;
+	private static Visual image;
 
 	public static void main(String args[]) {
 		
@@ -46,9 +47,9 @@ public class Main {
 		for(Entry<DryIngredient, Integer> ingredient : bread.getDryIngredients().entrySet()) {
 			bins.put(ingredient.getKey(), new IngredientBin(ingredient.getKey(), 50000) );
 		}
-		Premix mix1 = new Premix(bread, bins, bowls);
-		WetMix mix2 = new WetMix(bread, bowls, mixers);
-		Tipper mix = new Tipper(bins, bowls, mixers, vemag);
+		Premix mix1 = new Premix(bread, bins, bowls, NUM_MIXES);
+		WetMix mix2 = new WetMix(bread, bowls, mixers, NUM_MIXES);
+		Tipper mix = new Tipper(bins, bowls, mixers, vemag, NUM_MIXES);
 		
 		Thread thread= new Thread(mix1);
 		thread.start();
@@ -57,8 +58,14 @@ public class Main {
 		Thread thread3 = new Thread(mix);
 		thread3.start();
 		
+		image = new Visual(mix1, mix2, mix, bowl1, bowl2, vemag);
+		Thread thread4 = new Thread(image);
+		thread4.start();
+		
 		//ThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(5);
 		//executor.execute(THREAD);
+		
+		
 		
 	}
 }

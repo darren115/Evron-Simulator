@@ -45,7 +45,7 @@ public class IngredientBin {
 		used = true;
 	}
 	
-	public void releaseBin() {
+	public synchronized void releaseBin() {
 		used = false;
 	}
 	
