@@ -45,10 +45,14 @@ public class WetMix implements Runnable, Drawable {
 
 	private boolean wetMixReady = false;
 	private Map<WetIngredient, Boolean> ingredientsWeighed = new HashMap<>();
-	
+
 	private int numMixes = 10;
-	
-	ConcurrentLinkedQueue <String> previousStatus;
+	int numWeighed = 0;
+	int numTipped = 0;
+	int addedWater = 0;
+	int numStarted = 0;
+
+	ConcurrentLinkedQueue<String> previousStatus;
 	private String status = "";
 
 	public WetMix(Recipe recipe, List<Bowl> bowls, List<PoweredMixer> mixers, int numMixes) {
@@ -56,42 +60,42 @@ public class WetMix implements Runnable, Drawable {
 		this.bowls = bowls;
 		this.mixers = mixers;
 		this.numMixes = numMixes;
-		
+
 		previousStatus = new ConcurrentLinkedQueue<>();
 
 		for (WetIngredient ing : recipe.getWetIngredients().keySet()) {
 			ingredientsWeighed.put(ing, false);
 		}
 	}
-	
+
 	@Override
 	public void run() {
 		while (running) {
 
-			if (!wetMixReady) {
+			if (!wetMixReady && numWeighed < numMixes) {
 				weighMix();
 			} else {
 				tipMix();
 			}
-			
 
-			for (Bowl bowl : bowls) {
-//				try {
-//					Thread.sleep(1000);
-//					System.out.println(" Bowl " + bowl.getId() + " " + bowl.isHasWater() + " " + bowl.isHasWetMix() + 
-//					" " + bowl.isHasDryMix());
-//				} catch (InterruptedException e) {
-//					e.printStackTrace();
-//				}
-				if (bowl.isHasDryMix() && bowl.isHasWetMix() && bowl.isHasWater() == false) {
-					runWater(bowl);
-					break;
-				} else if (bowl.isHasDryMix() && bowl.isHasWater() && bowl.isHasWetMix() && !bowl.isMixing()) {
-					startMixer(bowl);
-					break;
+			if (addedWater <= numMixes && numStarted < numMixes) {
+				for (Bowl bowl : bowls) {
+
+					if (bowl.isHasDryMix() && bowl.isHasWetMix() && bowl.isHasWater() == false) {
+						runWater(bowl);
+						break;
+					} else if (bowl.isHasDryMix() && bowl.isHasWater() && bowl.isHasWetMix() && !bowl.isMixing()) {
+						startMixer(bowl);
+						break;
+					}
 				}
 			}
+			
+			//System.out.println("-------------" + addedWater + numWeighed + numTipped);
+			if((addedWater + numWeighed + numTipped + numStarted) == numMixes*4) running = false;
 		}
+		
+		updateStatus("Finished work");
 
 	}
 
@@ -102,19 +106,21 @@ public class WetMix implements Runnable, Drawable {
 				// skip?
 			} else {
 				try {
-					System.out.println("Weighing up wet ingredient " + ingredient.getKey());
-					updateStatus("Weighing up wet ingredient " + ingredient.getKey());
-					Thread.sleep(ingredient.getValue());
+//					System.out.println("Weighing up wet ingredient " + ingredient.getKey());
+					updateStatus("Weighing up wet ingredient " + ingredient.getKey() + " " + ingredient.getValue());
+					Thread.sleep(ingredient.getValue() * 2);
 
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 
-				System.out.println("Finished weighing up " + ingredient.getKey());
+//				System.out.println("Finished weighing up " + ingredient.getKey());
 				updateStatus("Finished weighing up " + ingredient.getKey());
 				wetMixReady = true;
 			}
 		}
+		numWeighed++;
+		updateStatus("Finished wet mix " + (200 + numWeighed));
 
 	}
 
@@ -123,7 +129,8 @@ public class WetMix implements Runnable, Drawable {
 			for (Bowl bowl : bowls) {
 				if (!bowl.isHasWetMix() && bowl.isHasDryMix()) {
 
-					System.out.println("Tipped wet mix");
+					numTipped++;
+//					System.out.println("Tipped wet mix");
 					updateStatus("Tipped wet mix");
 					bowl.setHasWetMix();
 					wetMixReady = false;
@@ -134,55 +141,55 @@ public class WetMix implements Runnable, Drawable {
 	}
 
 	private void runWater(Bowl bowl) {
-		System.out.println("Started Water");
+//		System.out.println("Started Water");
 		updateStatus("Started Water");
+		addedWater++;
 		bowl.setHasWater();
 	}
-	
-	//issue with bowl being started with 2 mixers
-	//adding bowl to both mixers
+
+	// issue with bowl being started with 2 mixers
+	// adding bowl to both mixers
 
 	private void startMixer(Bowl bowl) {
-		for(PoweredMixer mixer: mixers) {
-//			try {
-//				Thread.sleep(1000);
-////				System.out.println("Mixer " + mixer.getId() + " " + mixer.isMixing()
-////				+ " Bowl " + bowl.getId() + " " + bowl.isHasWater() + " " + bowl.isHasWetMix() + 
-////				" " + bowl.isEmpty());
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-			if(!mixer.isMixing() && !bowl.isFinishedMixing() && !bowl.isMixing()) {
+		for (PoweredMixer mixer : mixers) {
+			if (!mixer.isMixing() && !bowl.isFinishedMixing() && !bowl.isMixing()) {
 				bowl.setMixing();
 				mixer.start(bowl, 20000);
+				numStarted++;
 				break;
 			}
 		}
-		
+
 	}
-	
+
 	private void updateStatus(String status) {
-		
-		if(previousStatus.size()> 5) previousStatus.poll();
+
+		if (previousStatus.size() > 5)
+			previousStatus.poll();
 		previousStatus.offer(this.status);
 		this.status = status;
 	}
 
 	@Override
 	public void draw(Graphics g) {
-		g.setColor(Color.black);
-		g.setFont(new Font("arial", Font.BOLD, 16));
-		
-		int index = 0;
-		for(String oldStatus: previousStatus) {
-			g.drawString(oldStatus, 60, 510-((previousStatus.size() - index)*20));
-			index++;
-		}
-		
+
 		g.setColor(Color.black);
 		g.setFont(new Font("times new roman", Font.BOLD, 16));
-		g.drawString(status, 60, 520);
-		
+		g.drawString("Wet Premixer", 30, 360);
+
+		g.setColor(Color.black);
+		g.setFont(new Font("arial", Font.BOLD, 16));
+
+		int index = 0;
+		for (String oldStatus : previousStatus) {
+			g.drawString(oldStatus, 30, 510 - ((previousStatus.size() - index) * 20));
+			index++;
+		}
+
+		g.setColor(Color.black);
+		g.setFont(new Font("times new roman", Font.BOLD, 16));
+		g.drawString(status, 30, 520);
+
 	}
 
 }

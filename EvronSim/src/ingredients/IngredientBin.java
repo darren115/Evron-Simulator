@@ -31,6 +31,7 @@ public class IngredientBin {
 
 	public void setCurrentVolume(int currentVolume) {
 		this.currentVolume += currentVolume;
+		if(currentVolume > maxVolume) currentVolume = maxVolume;
 	}
 
 	public DryIngredient getType() {

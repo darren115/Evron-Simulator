@@ -12,6 +12,7 @@ public class Vemag implements Runnable, Drawable {
 	// private int clip;
 	private int speed;
 	private int currentVolume = 0;
+	private int maxVolume = 200000;
 	private int unitSize;
 	private boolean switchedOn = true;
 
@@ -54,13 +55,19 @@ public class Vemag implements Runnable, Drawable {
 				}
 			}
 
-			currentVolume = currentVolume - unitSize;
+			currentVolume = currentVolume - unitSize * 20;
 			// System.out.println("Running VEMAG volume remaining - " + currentVolume + " "
 			// + (60/speed) * unitSize);
-			updateStatus("Volume remaining - " + currentVolume + " speed " + (60 / speed) * unitSize);
-
+			updateStatus("Volume remaining - " + currentVolume);
+			
+			synchronized (lock) {
+				if (currentVolume <= maxVolume / 2) {
+					lock.notifyAll();
+				}
+			}
+			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep((60 / speed) * unitSize * 4);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -69,12 +76,23 @@ public class Vemag implements Runnable, Drawable {
 	}
 
 	public void tipMix(int size) {
-		this.currentVolume += size;
-		System.out.println("------Vemag filled" + currentVolume);
-		updateStatus("Vemag filled");
 		synchronized (lock) {
+			while (currentVolume + size > maxVolume) {
+				try {
+					lock.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+			this.currentVolume += size;
+			System.out.println("------Vemag filled" + currentVolume);
+			updateStatus("Vemag filled");
+
 			lock.notifyAll();
+
 		}
+
 	}
 
 	public int getSpeed() {
@@ -96,16 +114,20 @@ public class Vemag implements Runnable, Drawable {
 	@Override
 	public void draw(Graphics g) {
 		g.setColor(Color.black);
+		g.setFont(new Font("times new roman", Font.BOLD, 16));
+		g.drawString("Vemag", 580, 20);
+
+		g.setColor(Color.black);
 		g.setFont(new Font("arial", Font.BOLD, 16));
 
 		int index = 0;
 		for (String oldStatus : previousStatus) {
-			g.drawString(oldStatus, 600, 110 - ((previousStatus.size() - index) * 20));
+			g.drawString(oldStatus, 580, 170 - ((previousStatus.size() - index) * 20));
 			index++;
 		}
 		g.setColor(Color.black);
 		g.setFont(new Font("times new roman", Font.BOLD, 16));
-		g.drawString(status, 600, 120);
+		g.drawString(status, 580, 190);
 
 	}
 

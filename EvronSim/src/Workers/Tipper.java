@@ -36,6 +36,7 @@ public class Tipper implements Runnable, Drawable {
 	private Vemag vemag;
 	
 	private int numMixes = 10;
+	private int numTipped = 0;
 	
 	ConcurrentLinkedQueue <String> previousStatus;
 	
@@ -63,7 +64,7 @@ public class Tipper implements Runnable, Drawable {
 		
 		status = "Started Working";
 
-		while (!finished) {
+		while (numTipped < numMixes) {
 			
 			try {
 				Thread.sleep(1000);
@@ -85,6 +86,8 @@ public class Tipper implements Runnable, Drawable {
 				e.printStackTrace();
 			}
 		}
+		
+		updateStatus("Finished work");
 
 	}
 	
@@ -116,19 +119,25 @@ public class Tipper implements Runnable, Drawable {
 			e.printStackTrace();
 		}
 		bin.setCurrentVolume(bin.getMaxVolume());
-		System.out.println("Bin filled " + bin.getType());
+//		System.out.println("Bin filled " + bin.getType());
 		updateStatus("Bin filled " + bin.getType());
 	}
 
 	private void tipMix(Bowl bowl) {
-		System.out.println("-------------Tipped Mix into Vemag");
-		updateStatus("-------------Tipped Mix into Vemag");
-		bowl.setEmpty();
+//		System.out.println("---Tipped Mix into Vemag---");
 		vemag.tipMix(100000); //bowl should be aware of volume?
+		numTipped++;
+		updateStatus("---Tipped Mix" + (200+numTipped) + " into Vemag---");
+		bowl.setEmpty();
 	}
 
 	@Override
 	public void draw(Graphics g) {
+		
+		g.setColor(Color.black);
+		g.setFont(new Font("times new roman", Font.BOLD, 16));
+		g.drawString("Tipper", 560, 360);
+		
 		g.setColor(Color.black);
 		g.setFont(new Font("arial", Font.BOLD, 16));
 		

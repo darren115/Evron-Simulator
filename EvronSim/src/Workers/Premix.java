@@ -87,14 +87,14 @@ public class Premix implements Runnable, Drawable {
 		while (addedIngredients.size() > 0) {
 			for (Entry<DryIngredient, Integer> ingredient : addedIngredients.entrySet()) {
 
-				IngredientBin temp = bins.get(ingredient.getKey());
-				temp.useBin();
+				IngredientBin bin = bins.get(ingredient.getKey());
+				bin.useBin();
 				int amount = ingredient.getValue();
-				if (temp.getCurrentVolume() >= amount) {
-					temp.setCurrentVolume(-amount);
+				if (bin.getCurrentVolume() >= amount) {
+					bin.setCurrentVolume(-amount);
 					containersVolume += amount;
 					addedIngredients.remove(ingredient.getKey());
-					updateStatus("Weighed up ingredient " + ingredient.getKey() + " " + temp.getCurrentVolume());
+					updateStatus("Weighed up ingredient " + ingredient.getKey());
 					try {
 						//Take time to weigh up ingredient number of scoops * time per scoop
 						Thread.sleep((amount/scoopSize) * scoopTime);
@@ -103,7 +103,7 @@ public class Premix implements Runnable, Drawable {
 					}
 				}
 
-				temp.releaseBin();
+				bin.releaseBin();
 
 			}
 			
@@ -151,6 +151,8 @@ public class Premix implements Runnable, Drawable {
 		while (mixNumber <= numMixes+200) {
 			weighMix();
 		}
+		
+		updateStatus("Finished work");
 
 	}
 	
@@ -162,18 +164,24 @@ public class Premix implements Runnable, Drawable {
 	}
 	
 	public void draw(Graphics g) {
+		
+		g.setColor(Color.black);
+		g.setFont(new Font("times new roman", Font.BOLD, 16));
+		g.drawString("Dry Premixer" , 30, 25);
+		
+		
 		g.setColor(Color.black);
 		g.setFont(new Font("arial", Font.BOLD, 16));
 		
 		int index = 0;
 		for(String oldStatus: previousStatus) {
-			g.drawString(oldStatus, 60, 125-((previousStatus.size() - index)*20));
+			g.drawString(oldStatus, 30, 175-((previousStatus.size() - index)*20));
 			index++;
 		}
 		
 		g.setColor(Color.black);
 		g.setFont(new Font("times new roman", Font.BOLD, 16));
-		g.drawString(status, 60, 130);
+		g.drawString(status, 30, 190);
 		
 	}
 
